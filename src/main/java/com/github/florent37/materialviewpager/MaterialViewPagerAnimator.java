@@ -172,6 +172,7 @@ public class MaterialViewPagerAnimator {
 
         float scrollTop = -yOffset;
 
+        //Log.d(TAG, "onMAterialScroll::yOffset=" + yOffset + "::lastYOffset::=" + lastYOffset);
         {
             //parallax scroll of the Background ImageView (the KenBurnsView)
             if (mHeader.headerBackground != null) {
@@ -190,6 +191,7 @@ public class MaterialViewPagerAnimator {
             Log.d("yOffset", "" + yOffset);
 
         //dispatch the new offset to all registered scrollables
+        //Log.d(TAG, "scrollMaxDp=" + scrollMaxDp + "::yOffset=" + yOffset);
         dispatchScrollOffset(source, minMax(0, yOffset, scrollMaxDp));
 
         float percent = yOffset / scrollMax;
@@ -203,7 +205,8 @@ public class MaterialViewPagerAnimator {
                 lastPercent = percent; //save the percent
             }
 
-            if (mHeader.mPagerSlidingTabStrip != null) { //move the viewpager indicator
+            if (mHeader.mPagerSlidingTabStrip != null) {
+                //move the viewpager indicator
                 //float newY = ViewHelper.getY(mHeader.mPagerSlidingTabStrip) + scrollTop;
 
                 if (ENABLE_LOG)
@@ -421,10 +424,16 @@ public class MaterialViewPagerAnimator {
     }
 
     protected boolean isNewYOffset(int yOffset) {
+        boolean val = false;
         if (lastYOffset == -1)
-            return true;
+        {
+            val = true;
+        }
         else
-            return yOffset != lastYOffset;
+            val = (yOffset != lastYOffset);
+
+        //Log.d(TAG, "isNewOffset::val=" + val);
+        return val;
     }
 
     //region register scrollables
@@ -497,22 +506,27 @@ public class MaterialViewPagerAnimator {
      * @param observableScrollViewCallbacks use it if you want to get a callback of the RecyclerView
      */
     public void registerScrollView(final ObservableScrollView scrollView, final ObservableScrollViewCallbacks observableScrollViewCallbacks) {
-        if (scrollView != null) {
+        if (scrollView != null)
+        {
             scrollViewList.add(scrollView);  //add to the scrollable list
+
             if (scrollView.getParent() != null && scrollView.getParent().getParent() != null && scrollView.getParent().getParent() instanceof ViewGroup)
                 scrollView.setTouchInterceptionViewGroup((ViewGroup) scrollView.getParent().getParent());
+
             scrollView.setScrollViewCallbacks(new ObservableScrollViewCallbacks() {
 
                 boolean firstZeroPassed;
 
                 @Override
                 public void onScrollChanged(int yOffset, boolean b, boolean b2) {
+                    //Log.d("onScrollChanged", "::yOffset=" + yOffset);
                     if (observableScrollViewCallbacks != null)
                         observableScrollViewCallbacks.onScrollChanged(yOffset, b, b2);
 
                     //first time you get 0, don't share it to others scrolls
                     if (yOffset == 0 && !firstZeroPassed) {
                         firstZeroPassed = true;
+                        Log.d(TAG, "return in firstZeroPassed");
                         return;
                     }
 
